@@ -1,7 +1,10 @@
 import { Sparkles } from "lucide-react";
-import { mockWallet } from "@/data/mockWallet";
 
-export const AIBrief = () => (
+interface Props {
+  brief: string;
+}
+
+export const AIBrief = ({ brief }: Props) => (
   <div className="glass animate-fade-up rounded-2xl p-5 sm:p-6" style={{ animationDelay: "60ms" }}>
     <div className="mb-4 flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -15,7 +18,7 @@ export const AIBrief = () => (
       </span>
     </div>
     <p className="text-sm leading-relaxed text-foreground/90 sm:text-[0.95rem]">
-      {mockWallet.brief}
+      {brief}
     </p>
   </div>
 );
