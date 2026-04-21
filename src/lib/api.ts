@@ -50,8 +50,8 @@ export async function analyzeWallet(address: string): Promise<AnalyzeWalletRespo
 export async function createAlert(
   address: string,
   chatId: string,
-): Promise<{ success: boolean }> {
-  return request<{ success: boolean }>("/alerts/create", {
+): Promise<{ success: boolean; id?: string }> {
+  return request<{ success: boolean; id?: string }>("/alerts/create", {
     method: "POST",
     body: JSON.stringify({ address, chatId }),
   });
