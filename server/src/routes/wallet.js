@@ -1,22 +1,27 @@
 import { Router } from "express";
+import { fetchWalletTransactions } from "../services/helius.js";
 
 const router = Router();
 
-router.post("/analyze", (req, res) => {
+router.post("/analyze", async (req, res) => {
   const { address } = req.body || {};
 
   if (!address || typeof address !== "string") {
     return res.status(400).json({ error: "address is required" });
   }
 
-  return res.json({
-    transactions: [
-      { time: "2h ago", program: "Jupiter", solChange: -0.5, token: "USDC", type: "swap" },
-      { time: "5h ago", program: "Raydium", solChange: +2.1, token: "SOL", type: "transfer" },
-    ],
-    brief: "This wallet is actively trading...",
-    walletType: "Trader",
-  });
+  try {
+    const transactions = await fetchWalletTransactions(address);
+
+    return res.json({
+      transactions,
+      brief: "This wallet is actively trading...",
+      walletType: "Trader",
+    });
+  } catch (err) {
+    console.error("[wallet/analyze] Helius fetch failed:", err?.response?.data || err?.message || err);
+    return res.status(500).json({ error: "Helius fetch failed" });
+  }
 });
 
 export default router;
