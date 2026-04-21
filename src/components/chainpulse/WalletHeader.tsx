@@ -1,6 +1,5 @@
 import { Copy, Wallet } from "lucide-react";
 import { useState } from "react";
-import { mockWallet } from "@/data/mockWallet";
 
 const truncate = (a: string) => `${a.slice(0, 6)}…${a.slice(-6)}`;
 
@@ -10,11 +9,17 @@ const typeStyles: Record<string, string> = {
   Protocol: "bg-purple-500/15 text-purple-300 border-purple-400/30",
 };
 
-export const WalletHeader = () => {
+interface Props {
+  address: string;
+  walletType: string;
+  solBalance?: number;
+}
+
+export const WalletHeader = ({ address, walletType, solBalance }: Props) => {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(mockWallet.address);
+    await navigator.clipboard.writeText(address);
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
   };
@@ -32,7 +37,7 @@ export const WalletHeader = () => {
               onClick={copy}
               className="group mt-0.5 flex items-center gap-2 font-mono text-base font-medium text-foreground transition-colors hover:text-primary sm:text-lg"
             >
-              {truncate(mockWallet.address)}
+              {truncate(address)}
               <Copy className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100" />
               {copied && <span className="text-xs text-success">copied</span>}
             </button>
@@ -40,12 +45,14 @@ export const WalletHeader = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="glass-strong rounded-full px-4 py-1.5 font-mono text-sm">
-            <span className="text-muted-foreground">SOL</span>{" "}
-            <span className="font-semibold text-foreground">{mockWallet.solBalance.toLocaleString()}</span>
-          </span>
-          <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider ${typeStyles[mockWallet.type]}`}>
-            {mockWallet.type}
+          {typeof solBalance === "number" && (
+            <span className="glass-strong rounded-full px-4 py-1.5 font-mono text-sm">
+              <span className="text-muted-foreground">SOL</span>{" "}
+              <span className="font-semibold text-foreground">{solBalance.toLocaleString()}</span>
+            </span>
+          )}
+          <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider ${typeStyles[walletType] ?? typeStyles.Trader}`}>
+            {walletType}
           </span>
         </div>
       </div>

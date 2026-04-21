@@ -1,4 +1,4 @@
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Loader2, Search } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -32,8 +32,17 @@ export const WalletInput = ({ onSubmit, loading }: Props) => {
           />
         </div>
         <Button type="submit" variant="hero" size="lg" disabled={loading} className="sm:min-w-[180px]">
-          {loading ? "Analyzing…" : "Analyze Wallet"}
-          <ArrowRight className="h-4 w-4" />
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Analyzing…
+            </>
+          ) : (
+            <>
+              Analyze Wallet
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
       <button

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Sparkles, Zap, Shield, LineChart } from "lucide-react";
 import { Logo } from "@/components/chainpulse/Logo";
 import { WalletInput } from "@/components/chainpulse/WalletInput";
+import { analyzeWallet } from "@/lib/api";
+import { toast } from "sonner";
 
 const features = [
   { icon: Sparkles, title: "AI Briefs", desc: "Analyst-grade summaries of any wallet's behavior." },
@@ -15,9 +17,16 @@ const Index = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (_address: string) => {
+  const handleSubmit = async (address: string) => {
     setLoading(true);
-    setTimeout(() => navigate("/dashboard"), 350);
+    try {
+      await analyzeWallet(address);
+      navigate(`/dashboard?wallet=${encodeURIComponent(address)}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch wallet data");
+      setLoading(false);
+    }
   };
 
   return (

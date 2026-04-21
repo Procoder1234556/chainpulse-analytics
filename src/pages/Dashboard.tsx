@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { AIBrief } from "@/components/chainpulse/AIBrief";
 import { ActivityChart } from "@/components/chainpulse/ActivityChart";
 import { Logo } from "@/components/chainpulse/Logo";
@@ -12,14 +13,41 @@ import {
 } from "@/components/chainpulse/Skeletons";
 import { TransactionsTable } from "@/components/chainpulse/TransactionsTable";
 import { WalletHeader } from "@/components/chainpulse/WalletHeader";
+import { analyzeWallet, type AnalyzeWalletResponse } from "@/lib/api";
 
 const Dashboard = () => {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const address = params.get("wallet") ?? "";
+
   const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AnalyzeWalletResponse | null>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 900);
-    return () => clearTimeout(t);
-  }, []);
+    if (!address) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
+    analyzeWallet(address)
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) toast.error("Failed to fetch wallet data");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, navigate]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,18 +66,26 @@ const Dashboard = () => {
       </header>
 
       <main className="mx-auto max-w-6xl space-y-5 px-5 py-8 sm:px-8 sm:py-10">
-        {loading ? <HeaderSkeleton /> : <WalletHeader />}
+        {loading || !data ? (
+          <HeaderSkeleton />
+        ) : (
+          <WalletHeader address={address} walletType={data.walletType} />
+        )}
 
         <div className="grid gap-5 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            {loading ? <CardSkeleton lines={5} /> : <AIBrief />}
+            {loading || !data ? <CardSkeleton lines={5} /> : <AIBrief brief={data.brief} />}
           </div>
           <div className="lg:col-span-2">
             {loading ? <ChartSkeleton /> : <ActivityChart />}
           </div>
         </div>
 
-        {loading ? <TableSkeleton /> : <TransactionsTable />}
+        {loading || !data ? (
+          <TableSkeleton />
+        ) : (
+          <TransactionsTable transactions={data.transactions} />
+        )}
       </main>
     </div>
   );
