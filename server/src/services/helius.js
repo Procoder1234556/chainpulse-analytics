@@ -1,4 +1,5 @@
 import axios from "axios";
+import { HELIUS_KEY } from "../config/env.js";
 
 const HELIUS_BASE = "https://api.helius.xyz/v0";
 
@@ -80,13 +81,44 @@ function extractType(tx) {
 }
 
 /**
+ * Extract raw swap details for PnL estimation.
+ * Returns { mint, buyAmount, sellAmount } where amounts are in token units.
+ * For a SWAP tx, the feePayer sends one token and receives another.
+ * We model:
+ *  - sellAmount = sum of outgoing tokenTransfer amounts from feePayer
+ *  - buyAmount  = sum of incoming tokenTransfer amounts to feePayer
+ */
+function extractSwapDetails(tx) {
+  const feePayer = tx.feePayer;
+  const transfers = Array.isArray(tx.tokenTransfers) ? tx.tokenTransfers : [];
+  if (!feePayer || transfers.length === 0) return null;
+
+  let mint = null;
+  let buyAmount = 0;
+  let sellAmount = 0;
+
+  for (const t of transfers) {
+    const amount = Number(t.tokenAmount) || 0;
+    if (t.toUserAccount === feePayer) {
+      buyAmount += amount;
+      if (!mint && t.mint) mint = t.mint;
+    } else if (t.fromUserAccount === feePayer) {
+      sellAmount += amount;
+    }
+  }
+
+  if (!mint || (buyAmount === 0 && sellAmount === 0)) return null;
+  return { mint, buyAmount, sellAmount };
+}
+
+/**
  * Fetch and normalize wallet transactions from Helius Enhanced Transactions API.
  *
  * @param {string} address Solana wallet address
- * @returns {Promise<Array<{ time: string, program: string, solChange: number, token: string, type: string }>>}
+ * @returns {Promise<Array<{ time, program, solChange, token, type, mint, buyAmount, sellAmount }>>}
  */
 export async function fetchWalletTransactions(address) {
-  const apiKey = process.env.HELIUS_KEY;
+  const apiKey = HELIUS_KEY;
   if (!apiKey) throw new Error("HELIUS_KEY is not configured");
   if (!address || typeof address !== "string") {
     throw new Error("address is required");
@@ -105,11 +137,18 @@ export async function fetchWalletTransactions(address) {
 
   if (!Array.isArray(data)) return [];
 
-  return data.map((tx) => ({
-    time: formatRelativeTime(tx.timestamp),
-    program: extractProgram(tx),
-    solChange: extractSolChange(tx),
-    token: extractToken(tx),
-    type: extractType(tx),
-  }));
+  return data.map((tx) => {
+    const swapDetails = extractSwapDetails(tx);
+    return {
+      time: formatRelativeTime(tx.timestamp),
+      program: extractProgram(tx),
+      solChange: extractSolChange(tx),
+      token: extractToken(tx),
+      type: extractType(tx),
+      // Swap detail fields — null for non-swap txns
+      mint: swapDetails?.mint ?? null,
+      buyAmount: swapDetails?.buyAmount ?? null,
+      sellAmount: swapDetails?.sellAmount ?? null,
+    };
+  });
 }

@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { TELEGRAM_BOT_TOKEN } from "../config/env.js";
 
 /**
  * Send a Telegram message to the given chat.
@@ -8,7 +9,7 @@ import fetch from "node-fetch";
  * @returns {Promise<object>} Telegram API result payload.
  */
 export async function sendAlert(chatId, message) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error("TELEGRAM_BOT_TOKEN is not configured");
   if (!chatId) throw new Error("chatId is required");
 
