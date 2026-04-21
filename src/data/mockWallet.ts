@@ -24,7 +24,7 @@ export const mockTransactions: Transaction[] = [
   { time: "2h ago",  program: "Phoenix",   solChange:   -7.88, token: "SOL → JTO",  type: "swap" },
   { time: "3h ago",  program: "System",    solChange:  +250.0, token: "SOL",        type: "transfer" },
   { time: "5h ago",  program: "Jupiter",   solChange:   -18.6, token: "SOL → WIF",  type: "swap" },
-  { time: "9h ago',  program: "Kamino",    solChange:   +0.42, token: "kSOL yield", type: "stake" },
+  { time: "9h ago",  program: "Kamino",    solChange:   +0.42, token: "kSOL yield", type: "stake" },
   { time: "14h ago", program: "Tensor",    solChange:   -2.50, token: "Mad Lads",   type: "transfer" },
   { time: "1d ago",  program: "Drift",     solChange:   +9.14, token: "SOL-PERP",   type: "swap" },
 ];
