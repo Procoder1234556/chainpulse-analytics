@@ -1,7 +1,22 @@
 import { Router } from "express";
 import { fetchWalletTransactions } from "../services/helius.js";
+import { generateWalletBrief } from "../services/claude.js";
 
 const router = Router();
+
+function classifyWallet(transactions) {
+  if (!Array.isArray(transactions) || transactions.length === 0) return "Holder";
+
+  if (transactions.length > 10) return "Whale";
+
+  const swaps = transactions.filter(
+    (t) => typeof t.type === "string" && t.type.toUpperCase() === "SWAP",
+  ).length;
+
+  if (swaps > transactions.length / 2) return "Trader";
+
+  return "Holder";
+}
 
 router.post("/analyze", async (req, res) => {
   const { address } = req.body || {};
@@ -13,10 +28,22 @@ router.post("/analyze", async (req, res) => {
   try {
     const transactions = await fetchWalletTransactions(address);
 
+    const walletType = classifyWallet(transactions);
+
+    let brief = "Analysis unavailable";
+    try {
+      brief = await generateWalletBrief(transactions);
+    } catch (err) {
+      console.error(
+        "[wallet/analyze] Claude brief failed:",
+        err?.response?.data || err?.message || err,
+      );
+    }
+
     return res.json({
       transactions,
-      brief: "This wallet is actively trading...",
-      walletType: "Trader",
+      brief,
+      walletType,
     });
   } catch (err) {
     console.error("[wallet/analyze] Helius fetch failed:", err?.response?.data || err?.message || err);
