@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { AIBrief } from "@/components/chainpulse/AIBrief";
 import { ActivityChart } from "@/components/chainpulse/ActivityChart";
+import { AlertDialog } from "@/components/chainpulse/AlertDialog";
 import { Logo } from "@/components/chainpulse/Logo";
 import {
   CardSkeleton,
@@ -55,13 +56,16 @@ const Dashboard = () => {
       <header className="sticky top-0 z-20 border-b border-border/40 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
           <Logo />
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            New search
-          </Link>
+          <div className="flex items-center gap-3">
+            {address && <AlertDialog address={address} />}
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">New search</span>
+            </Link>
+          </div>
         </div>
       </header>
 
