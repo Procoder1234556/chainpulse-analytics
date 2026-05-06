@@ -17,8 +17,14 @@ export const AIBrief = ({ brief }: Props) => (
         <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse-glow" /> live
       </span>
     </div>
-    <p className="text-sm leading-relaxed text-foreground/90 sm:text-[0.95rem]">
-      {brief}
-    </p>
+    {brief === "Analysis unavailable" ? (
+      <p className="text-sm italic text-muted-foreground sm:text-[0.95rem]">
+        Analysis unavailable right now. Please try again shortly.
+      </p>
+    ) : (
+      <p className="text-sm leading-relaxed text-foreground/90 sm:text-[0.95rem]">
+        {brief}
+      </p>
+    )}
   </div>
 );
