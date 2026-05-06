@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Share from "./pages/Share.tsx";
+import Pepe from "./pages/Pepe.tsx";
+import PepeDashboard from "./pages/PepeDashboard.tsx";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/share/:wallet" element={<Share />} />
+          <Route path="/pepe" element={<Pepe />} />
+          <Route path="/pepe/dashboard" element={<PepeDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
