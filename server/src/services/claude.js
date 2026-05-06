@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ANTHROPIC_KEY } from "../config/env.js";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
@@ -12,7 +13,7 @@ const SYSTEM_PROMPT =
  * @returns {Promise<string>} The generated brief text.
  */
 export async function generateWalletBrief(transactions) {
-  const apiKey = process.env.ANTHROPIC_KEY;
+  const apiKey = ANTHROPIC_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_KEY is not configured");
 
   const { data } = await axios.post(

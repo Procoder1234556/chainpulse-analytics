@@ -1,16 +1,21 @@
 import { ArrowRight, Loader2, Search } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   onSubmit: (address: string) => void;
   loading?: boolean;
+  forcedValue?: string;
 }
 
 const SAMPLE = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU";
 
-export const WalletInput = ({ onSubmit, loading }: Props) => {
+export const WalletInput = ({ onSubmit, loading, forcedValue }: Props) => {
   const [value, setValue] = useState("");
+
+  useEffect(() => {
+    if (forcedValue) setValue(forcedValue);
+  }, [forcedValue]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
