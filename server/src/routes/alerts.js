@@ -3,6 +3,8 @@ import { newAlertId, readAlerts, writeAlerts } from "../lib/alertsStore.js";
 import { incrementAlertsCreated } from "../services/analytics.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { createTierRateLimiter } from "../middleware/rateLimiter.js";
+import { createAlertIpLimiter } from "../middleware/ipRateLimit.js";
+import { isValidSolanaAddress } from "../utils/validateAddress.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
@@ -19,11 +21,15 @@ router.get("/list", asyncHandler(async (req, res) => {
   return res.json(userAlerts);
 }));
 
-router.post("/create", asyncHandler(async (req, res) => {
+router.post("/create", createAlertIpLimiter, asyncHandler(async (req, res) => {
   const { address, chatId, minSolThreshold } = req.body || {};
 
   if (!address || !chatId) {
     return res.status(400).json({ error: "address and chatId are required" });
+  }
+
+  if (!isValidSolanaAddress(address)) {
+    return res.status(400).json({ error: "Invalid Solana address" });
   }
 
   const alerts = await readAlerts();

@@ -6,6 +6,8 @@ import { incrementWalletAnalyses } from "../services/analytics.js";
 import { calculatePnL } from "../services/pnl.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { createTierRateLimiter } from "../middleware/rateLimiter.js";
+import { analyzeIpLimiter } from "../middleware/ipRateLimit.js";
+import { validateAddressMiddleware, isValidSolanaAddress } from "../utils/validateAddress.js";
 import { logger } from "../utils/logger.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -267,22 +269,24 @@ router.get("/public/:address", asyncHandler(async (req, res) => {
   });
 }));
 
-router.post("/analyze", optionalAuth, analyzeRateLimit, asyncHandler(async (req, res) => {
-  const { address } = req.body || {};
-
-  if (!address || typeof address !== "string") {
-    return res.status(400).json({ error: "address is required" });
-  }
-
-  const result = await fetchAndAnalyzeWallet(address);
-  return res.json(result);
-}));
+router.post(
+  "/analyze",
+  analyzeIpLimiter,
+  optionalAuth,
+  analyzeRateLimit,
+  validateAddressMiddleware,
+  asyncHandler(async (req, res) => {
+    const { address } = req.body;
+    const result = await fetchAndAnalyzeWallet(address);
+    return res.json(result);
+  }),
+);
 
 router.post("/compare", optionalAuth, analyzeRateLimit, asyncHandler(async (req, res) => {
   const { address1, address2 } = req.body || {};
 
-  if (!address1 || !address2 || typeof address1 !== "string" || typeof address2 !== "string") {
-    return res.status(400).json({ error: "address1 and address2 are required" });
+  if (!isValidSolanaAddress(address1) || !isValidSolanaAddress(address2)) {
+    return res.status(400).json({ error: "Invalid Solana address" });
   }
 
   const [wallet1, wallet2] = await Promise.all([

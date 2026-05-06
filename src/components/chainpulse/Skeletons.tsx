@@ -31,7 +31,7 @@ export const CardSkeleton = ({ lines = 4 }: { lines?: number }) => (
 export const TableSkeleton = () => (
   <div className="glass space-y-3 rounded-2xl p-6">
     <Shimmer className="h-4 w-40" />
-    {Array.from({ length: 6 }).map((_, i) => (
+    {Array.from({ length: 5 }).map((_, i) => (
       <Shimmer key={i} className="h-8 w-full" />
     ))}
   </div>
@@ -41,5 +41,12 @@ export const ChartSkeleton = () => (
   <div className="glass space-y-3 rounded-2xl p-6">
     <Shimmer className="h-4 w-24" />
     <Shimmer className="h-48 w-full" />
+  </div>
+);
+
+export const BriefSkeleton = () => (
+  <div className="glass relative overflow-hidden rounded-2xl p-6">
+    <div className="mb-4 h-3 w-24 rounded-md bg-white/[0.06]" />
+    <div className="h-24 w-full animate-pulse rounded-xl bg-gradient-to-r from-primary/10 via-primary/25 to-primary/10 bg-[length:200%_100%]" style={{ animation: "shimmer 2s linear infinite" }} />
   </div>
 );
