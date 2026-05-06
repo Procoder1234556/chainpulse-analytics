@@ -12,6 +12,7 @@ import {
   ChartSkeleton,
   HeaderSkeleton,
   TableSkeleton,
+  BriefSkeleton,
 } from "@/components/chainpulse/Skeletons";
 import { TransactionsTable } from "@/components/chainpulse/TransactionsTable";
 import { WalletHeader } from "@/components/chainpulse/WalletHeader";
@@ -77,6 +78,7 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<AnalyzeWalletResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [compareInput, setCompareInput] = useState("");
   const [comparing, setComparing] = useState(false);
@@ -114,6 +116,7 @@ const Dashboard = () => {
 
     let cancelled = false;
     setLoading(true);
+    setError(null);
     setCompareData(null); // Reset compare data on new address
     setCompareInput("");
 
@@ -123,7 +126,10 @@ const Dashboard = () => {
       })
       .catch((err) => {
         console.error(err);
-        if (!cancelled) toast.error("Failed to fetch wallet data");
+        if (!cancelled) {
+          setError("Could not analyze wallet. Check address and try again.");
+          toast.error("Failed to fetch wallet data");
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -206,6 +212,17 @@ const Dashboard = () => {
 
         {compareData ? (
           <CompareView data={compareData} address1={address} address2={compareInput} />
+        ) : error ? (
+          <div className="glass animate-fade-up rounded-2xl p-8 text-center">
+            <h3 className="text-base font-semibold text-foreground">Could not analyze wallet</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Check address and try again.</p>
+            <button
+              onClick={() => navigate("/")}
+              className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Back to search
+            </button>
+          </div>
         ) : (
           <>
             {loading || !data ? (
@@ -220,7 +237,7 @@ const Dashboard = () => {
 
             <div className="grid gap-5 lg:grid-cols-5">
               <div className="lg:col-span-3">
-                {loading || !data ? <CardSkeleton lines={5} /> : <AIBrief brief={data.brief} />}
+                {loading || !data ? <BriefSkeleton /> : <AIBrief brief={data.brief} />}
               </div>
               <div className="lg:col-span-2">
                 {loading ? <ChartSkeleton /> : <ActivityChart />}
